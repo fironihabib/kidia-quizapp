@@ -7,6 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 // Import screens
+import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import AccountSetupScreen from '../screens/AccountSetupScreen';
 import TeacherDashboard from '../screens/TeacherDashboard';
@@ -95,7 +96,11 @@ const StudentTabNavigator = () => {
 // Auth Stack Navigator
 const AuthStackNavigator = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Splash"
+    >
+      <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="AccountSetup" component={AccountSetupScreen} />
     </Stack.Navigator>

@@ -2,14 +2,15 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const KidiaButton = ({ 
-  children, 
-  onPress, 
+const KidiaButton = ({
+  children,
+  title,
+  onPress,
   variant = 'primary', // primary, secondary, outline
-  style, 
+  style,
   disabled = false,
   icon,
-  ...props 
+  ...props
 }) => {
   const getButtonColors = () => {
     switch (variant) {
@@ -44,7 +45,7 @@ const KidiaButton = ({
         {...props}
       >
         {icon && <View style={styles.iconContainer}>{icon}</View>}
-        <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
+        <Text style={[styles.text, { color: getTextColor() }]}>{title || children}</Text>
       </TouchableOpacity>
     );
   }
@@ -63,7 +64,7 @@ const KidiaButton = ({
         end={{ x: 1, y: 1 }}
       >
         {icon && <View style={styles.iconContainer}>{icon}</View>}
-        <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
+        <Text style={[styles.text, { color: getTextColor() }]}>{title || children}</Text>
       </LinearGradient>
     </TouchableOpacity>
   );

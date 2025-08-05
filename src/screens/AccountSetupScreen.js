@@ -18,15 +18,19 @@ import { useApp } from '../context/AppContext';
 
 const AccountSetupScreen = ({ navigation, route }) => {
   const { login, addUser } = useApp();
-  const { email, password } = route.params || {};
+  const { email, password, role = 'student' } = route.params || {};
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     fullName: '',
     gender: 'Male',
     nickname: '',
-    age: 5,
+    age: role === 'teacher' ? 25 : 5,
     interests: [],
-    character: null
+    character: null,
+    // Teacher specific fields
+    school: '',
+    subject: '',
+    experience: 1
   });
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
@@ -34,6 +38,12 @@ const AccountSetupScreen = ({ navigation, route }) => {
     'Science', 'Arts', 'History', 'Languages', 'Software', 'Movies',
     'Math', 'Space', 'Games', 'Animals', 'Music', 'Reading',
     'Sports', 'Food'
+  ];
+
+  const teacherSubjects = [
+    'Mathematics', 'Science', 'History', 'Geography', 'Language Arts',
+    'Art', 'Music', 'Physical Education', 'Computer Science', 'Biology',
+    'Chemistry', 'Physics', 'Literature', 'Social Studies', 'Psychology'
   ];
 
   const characters = [
@@ -51,16 +61,35 @@ const AccountSetupScreen = ({ navigation, route }) => {
         return;
       }
     }
-    
-    if (currentStep === 4) {
-      if (!profileData.character) {
-        Alert.alert('Hata', 'Lütfen bir karakter seçin');
-        return;
-      }
-    }
 
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+    if (role === 'teacher') {
+      if (currentStep === 2) {
+        if (!profileData.school.trim()) {
+          Alert.alert('Hata', 'Lütfen okul adını girin');
+          return;
+        }
+      }
+      if (currentStep === 3) {
+        if (!profileData.subject.trim()) {
+          Alert.alert('Hata', 'Lütfen bir ders seçin');
+          return;
+        }
+      }
+      // Teachers have 4 steps instead of 5
+      if (currentStep < 4) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      // Student flow
+      if (currentStep === 4) {
+        if (!profileData.character) {
+          Alert.alert('Hata', 'Lütfen bir karakter seçin');
+          return;
+        }
+      }
+      if (currentStep < 5) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -77,9 +106,9 @@ const AccountSetupScreen = ({ navigation, route }) => {
     const newUser = {
       id: Date.now(),
       name: profileData.fullName,
-      email: email || 'student@demo.com',
+      email: email || (role === 'teacher' ? 'teacher@demo.com' : 'student@demo.com'),
       password: password,
-      role: 'student',
+      role: role,
       profile: profileData
     };
 
@@ -100,18 +129,23 @@ const AccountSetupScreen = ({ navigation, route }) => {
     setProfileData({ ...profileData, character });
   };
 
-  const renderProgressBar = () => (
-    <View style={styles.progressContainer}>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${(currentStep / 5) * 100}%` }]} />
+  const renderProgressBar = () => {
+    const totalSteps = role === 'teacher' ? 4 : 5;
+    return (
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${(currentStep / totalSteps) * 100}%` }]} />
+        </View>
+        <Text style={styles.progressText}>{currentStep}/{totalSteps}</Text>
       </View>
-      <Text style={styles.progressText}>{currentStep}/5</Text>
-    </View>
-  );
+    );
+  };
 
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Tell us a bit about our kid</Text>
+      <Text style={styles.stepTitle}>
+        {role === 'teacher' ? 'Tell us about yourself' : 'Tell us a bit about our kid'}
+      </Text>
       
       <View style={styles.formContainer}>
         <Text style={styles.fieldLabel}>Full name</Text>
@@ -171,108 +205,206 @@ const AccountSetupScreen = ({ navigation, route }) => {
     </View>
   );
 
-  const renderStep2 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>How old is your child?</Text>
-      <Text style={styles.stepSubtitle}>This will help us set the right content for your child</Text>
-      
-      <View style={styles.ageContainer}>
-        <View style={styles.ageDisplay}>
-          <Text style={styles.ageNumber}>{profileData.age}</Text>
-        </View>
-        
-        <View style={styles.sliderContainer}>
-          <View style={styles.sliderTrack}>
-            <View style={styles.sliderNumbers}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                <Text key={num} style={styles.sliderNumber}>{num}</Text>
-              ))}
-            </View>
-            <Slider
-              style={styles.slider}
-              minimumValue={1}
-              maximumValue={10}
-              value={profileData.age}
-              onValueChange={(value) => setProfileData({...profileData, age: Math.round(value)})}
-              minimumTrackTintColor="#8B5FBF"
-              maximumTrackTintColor="#E5E7EB"
-              thumbStyle={styles.sliderThumb}
+  const renderStep2 = () => {
+    if (role === 'teacher') {
+      return (
+        <View style={styles.stepContainer}>
+          <Text style={styles.stepTitle}>Where do you teach?</Text>
+          <Text style={styles.stepSubtitle}>Tell us about your school</Text>
+
+          <View style={styles.formContainer}>
+            <Text style={styles.fieldLabel}>School Name</Text>
+            <KidiaInput
+              placeholder="Enter your school name"
+              value={profileData.school}
+              onChangeText={(text) => setProfileData({...profileData, school: text})}
             />
+
+            <Text style={styles.fieldLabel}>Teaching Experience</Text>
+            <View style={styles.ageContainer}>
+              <View style={styles.ageDisplay}>
+                <Text style={styles.ageNumber}>{profileData.experience}</Text>
+                <Text style={styles.ageUnit}>years</Text>
+              </View>
+
+              <View style={styles.sliderContainer}>
+                <Slider
+                  style={styles.slider}
+                  minimumValue={1}
+                  maximumValue={30}
+                  value={profileData.experience}
+                  onValueChange={(value) => setProfileData({...profileData, experience: Math.round(value)})}
+                  minimumTrackTintColor="#8B5FBF"
+                  maximumTrackTintColor="#E5E7EB"
+                  thumbStyle={styles.sliderThumb}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={styles.stepTitle}>How old is your child?</Text>
+        <Text style={styles.stepSubtitle}>This will help us set the right content for your child</Text>
+
+        <View style={styles.ageContainer}>
+          <View style={styles.ageDisplay}>
+            <Text style={styles.ageNumber}>{profileData.age}</Text>
+          </View>
+
+          <View style={styles.sliderContainer}>
+            <View style={styles.sliderTrack}>
+              <View style={styles.sliderNumbers}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                  <Text key={num} style={styles.sliderNumber}>{num}</Text>
+                ))}
+              </View>
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={10}
+                value={profileData.age}
+                onValueChange={(value) => setProfileData({...profileData, age: Math.round(value)})}
+                minimumTrackTintColor="#8B5FBF"
+                maximumTrackTintColor="#E5E7EB"
+                thumbStyle={styles.sliderThumb}
+              />
+            </View>
           </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
-  const renderStep3 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>What are some of your child's interests?</Text>
+  const renderStep3 = () => {
+    if (role === 'teacher') {
+      return (
+        <View style={styles.stepContainer}>
+          <Text style={styles.stepTitle}>What subject do you teach?</Text>
+          <Text style={styles.stepSubtitle}>Select your primary teaching subject</Text>
 
-      <View style={styles.interestsContainer}>
-        {interests.map((interest) => (
-          <TouchableOpacity
-            key={interest}
-            style={[
-              styles.interestChip,
-              profileData.interests.includes(interest) && styles.interestChipSelected
-            ]}
-            onPress={() => toggleInterest(interest)}
-          >
-            <Text style={[
-              styles.interestText,
-              profileData.interests.includes(interest) && styles.interestTextSelected
-            ]}>
-              {interest}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-
-  const renderStep4 = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Choose your Character</Text>
-
-      <View style={styles.characterContainer}>
-        <View style={styles.characterDisplay}>
-          {profileData.character ? (
-            <Text style={styles.characterEmoji}>{profileData.character.emoji}</Text>
-          ) : (
-            <View style={styles.characterPlaceholder}>
-              <Ionicons name="person" size={60} color="#8B5FBF" />
-            </View>
-          )}
-        </View>
-
-        <View style={styles.characterNavigation}>
-          <TouchableOpacity style={styles.navButton}>
-            <Ionicons name="chevron-back" size={24} color="#8B5FBF" />
-          </TouchableOpacity>
-
-          <View style={styles.characterOptions}>
-            {characters.map((character) => (
+          <View style={styles.interestsContainer}>
+            {teacherSubjects.map((subject) => (
               <TouchableOpacity
-                key={character.id}
+                key={subject}
                 style={[
-                  styles.characterOption,
-                  { backgroundColor: character.color },
-                  profileData.character?.id === character.id && styles.characterOptionSelected
+                  styles.interestChip,
+                  profileData.subject === subject && styles.interestChipSelected
                 ]}
-                onPress={() => selectCharacter(character)}
+                onPress={() => setProfileData({...profileData, subject})}
               >
-                <Text style={styles.characterOptionEmoji}>{character.emoji}</Text>
+                <Text style={[
+                  styles.interestText,
+                  profileData.subject === subject && styles.interestTextSelected
+                ]}>
+                  {subject}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+      );
+    }
 
-          <TouchableOpacity style={styles.navButton}>
-            <Ionicons name="chevron-forward" size={24} color="#8B5FBF" />
-          </TouchableOpacity>
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={styles.stepTitle}>What are some of your child's interests?</Text>
+
+        <View style={styles.interestsContainer}>
+          {interests.map((interest) => (
+            <TouchableOpacity
+              key={interest}
+              style={[
+                styles.interestChip,
+                profileData.interests.includes(interest) && styles.interestChipSelected
+              ]}
+              onPress={() => toggleInterest(interest)}
+            >
+              <Text style={[
+                styles.interestText,
+                profileData.interests.includes(interest) && styles.interestTextSelected
+              ]}>
+                {interest}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
-    </View>
-  );
+    );
+  };
+
+  const renderStep4 = () => {
+    if (role === 'teacher') {
+      return (
+        <View style={styles.stepContainer}>
+          <View style={styles.congratsContainer}>
+            <View style={styles.congratsIcon}>
+              <Text style={styles.congratsEmoji}>🎉</Text>
+            </View>
+            <Text style={styles.congratsTitle}>Welcome to Kidia!</Text>
+            <Text style={styles.congratsSubtitle}>
+              Your teacher profile is ready. Start creating engaging quizzes for your students!
+            </Text>
+
+            <KidiaButton
+              variant="primary"
+              onPress={handleComplete}
+              style={styles.startButton}
+            >
+              Start Teaching
+            </KidiaButton>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={styles.stepTitle}>Choose your Character</Text>
+
+        <View style={styles.characterContainer}>
+          <View style={styles.characterDisplay}>
+            {profileData.character ? (
+              <Text style={styles.characterEmoji}>{profileData.character.emoji}</Text>
+            ) : (
+              <View style={styles.characterPlaceholder}>
+                <Ionicons name="person" size={60} color="#8B5FBF" />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.characterNavigation}>
+            <TouchableOpacity style={styles.navButton}>
+              <Ionicons name="chevron-back" size={24} color="#8B5FBF" />
+            </TouchableOpacity>
+
+            <View style={styles.characterOptions}>
+              {characters.map((character) => (
+                <TouchableOpacity
+                  key={character.id}
+                  style={[
+                    styles.characterOption,
+                    { backgroundColor: character.color },
+                    profileData.character?.id === character.id && styles.characterOptionSelected
+                  ]}
+                  onPress={() => selectCharacter(character)}
+                >
+                  <Text style={styles.characterOptionEmoji}>{character.emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity style={styles.navButton}>
+              <Ionicons name="chevron-forward" size={24} color="#8B5FBF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   const renderStep5 = () => (
     <View style={styles.stepContainer}>
@@ -314,15 +446,25 @@ const AccountSetupScreen = ({ navigation, route }) => {
             {currentStep === 2 && renderStep2()}
             {currentStep === 3 && renderStep3()}
             {currentStep === 4 && renderStep4()}
-            {currentStep === 5 && renderStep5()}
+            {currentStep === 5 && role === 'student' && renderStep5()}
 
-            {currentStep < 5 && (
+            {((role === 'teacher' && currentStep < 4) || (role === 'student' && currentStep < 5)) && (
               <KidiaButton
                 variant="primary"
                 onPress={handleNext}
                 style={styles.continueButton}
               >
                 Continue
+              </KidiaButton>
+            )}
+
+            {role === 'student' && currentStep === 5 && (
+              <KidiaButton
+                variant="primary"
+                onPress={handleComplete}
+                style={styles.continueButton}
+              >
+                Start Learning
               </KidiaButton>
             )}
           </View>
@@ -486,6 +628,12 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#8B5FBF',
+  },
+  ageUnit: {
+    fontSize: 16,
+    color: '#8B5FBF',
+    marginTop: 8,
+    fontWeight: '500',
   },
   sliderContainer: {
     width: '100%',

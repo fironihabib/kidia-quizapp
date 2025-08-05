@@ -31,20 +31,29 @@ export default function App() {
   if (Platform.OS === 'web') {
     return (
       <View style={{
-        width: 375,
-        height: 812,
-        maxWidth: '100vw',
-        maxHeight: '100vh',
-        backgroundColor: 'white',
-        borderRadius: 20,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 20 },
-        shadowOpacity: 0.3,
-        shadowRadius: 40,
-        elevation: 20,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
       }}>
-        <AppContent />
+        <View style={{
+          width: 375,
+          height: 812,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          backgroundColor: 'white',
+          borderRadius: 20,
+          overflow: 'hidden',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 20 },
+          shadowOpacity: 0.3,
+          shadowRadius: 40,
+          elevation: 20,
+        }}>
+          <AppContent />
+        </View>
       </View>
     );
   }

@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   StyleSheet,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -13,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import KidiaBackground from '../components/KidiaBackground';
-import KidiaMascot from '../components/KidiaMascot';
+import KidiaLogo from '../components/KidiaLogo';
 import KidiaButton from '../components/KidiaButton';
 import KidiaInput from '../components/KidiaInput';
 import { useApp } from '../context/AppContext';
@@ -46,10 +44,11 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Hata', 'Lütfen şartları kabul edin');
       return;
     }
-    // Navigate to account setup for students
+    // Navigate to account setup
     navigation.navigate('AccountSetup', {
       email: formData.email,
-      password: formData.password
+      password: formData.password,
+      role: selectedRole
     });
   };
 
@@ -65,7 +64,16 @@ const LoginScreen = ({ navigation }) => {
 
   const handleRoleSelection = (role) => {
     setSelectedRole(role);
-    setCurrentScreen('userSelect');
+    if (role === 'teacher') {
+      // Teachers go directly to account setup
+      navigation.navigate('AccountSetup', {
+        email: 'teacher@demo.com',
+        password: 'demo123',
+        role: 'teacher'
+      });
+    } else {
+      setCurrentScreen('userSelect');
+    }
   };
 
   const handleUserSelection = (user) => {
@@ -90,12 +98,8 @@ const LoginScreen = ({ navigation }) => {
       <KidiaBackground>
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.header}>
-              <Text style={styles.appTitle}>QUIZZY</Text>
-            </View>
-
-            <View style={styles.mascotContainer}>
-              <KidiaMascot size="large" />
+            <View style={styles.logoContainer}>
+              <KidiaLogo size="large" />
             </View>
 
             <View style={styles.welcomeCard}>
@@ -423,7 +427,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 2,
   },
-  mascotContainer: {
+  logoContainer: {
     alignItems: 'center',
     marginVertical: 40,
   },

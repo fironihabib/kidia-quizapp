@@ -1,23 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
   Alert,
-} from 'react-native';
-import {
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
   Text,
-  Card,
-  Title,
-  Button,
-  List,
-  Divider,
-  Avatar,
-} from 'react-native-paper';
+  Dimensions,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
+import KidiaButton from '../components/KidiaButton';
 import { useApp } from '../context/AppContext';
 
+const { width } = Dimensions.get('window');
+
 const ProfileScreen = ({ navigation }) => {
-  const { currentUser, logout, getQuizzesByTeacher, getQuizResultsByStudent } = useApp();
+  const { currentUser, logout } = useApp();
+  const [showExpandedMenu, setShowExpandedMenu] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -37,206 +39,423 @@ const ProfileScreen = ({ navigation }) => {
     );
   };
 
-  const getStats = () => {
-    if (currentUser?.role === 'teacher') {
-      const quizzes = getQuizzesByTeacher(currentUser.id);
-      const totalQuestions = quizzes.reduce((sum, quiz) => sum + quiz.questions.length, 0);
-      return {
-        quizzes: quizzes.length,
-        questions: totalQuestions,
-      };
-    } else {
-      const results = getQuizResultsByStudent(currentUser.id);
-      const averageScore = results.length > 0 
-        ? Math.round(results.reduce((sum, result) => sum + (result.score / result.totalPoints * 100), 0) / results.length)
-        : 0;
-      return {
-        completed: results.length,
-        averageScore: averageScore,
-      };
-    }
-  };
+  // Challenge data
+  const challengeData = [
+    { title: 'Daily\nChallenge\nStreak', value: '15', icon: '🔥' },
+    { title: 'Weekly\nChallenge\nStreak', value: '2', icon: '🔥' },
+    { title: 'Monthly\nChallenge\nStreak', value: '0', icon: '🔥' },
+  ];
 
-  const stats = getStats();
+  const menuItems = [
+    { icon: 'settings-outline', title: 'Settings', color: '#8B7CF6' },
+    { icon: 'shield-checkmark-outline', title: 'Privacy', color: '#8B7CF6' },
+    { icon: 'document-text-outline', title: 'Terms & conditions', color: '#8B7CF6' },
+    { icon: 'star-outline', title: 'Rate this app', color: '#8B7CF6' },
+  ];
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Avatar.Text 
-          size={80} 
-          label={currentUser?.name?.charAt(0) || 'U'} 
-          style={styles.avatar}
-        />
-        <Title style={styles.name}>{currentUser?.name}</Title>
-        <Text style={styles.role}>
-          {currentUser?.role === 'teacher' ? 'Öğretmen' : 'Öğrenci'}
-        </Text>
-        <Text style={styles.email}>{currentUser?.email}</Text>
-      </View>
-
-      <Card style={styles.statsCard}>
-        <Card.Content>
-          <Title style={styles.statsTitle}>İstatistikler</Title>
-          {currentUser?.role === 'teacher' ? (
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{stats.quizzes}</Text>
-                <Text style={styles.statLabel}>Oluşturulan Quiz</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{stats.questions}</Text>
-                <Text style={styles.statLabel}>Toplam Soru</Text>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{stats.completed}</Text>
-                <Text style={styles.statLabel}>Tamamlanan Quiz</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{stats.averageScore}%</Text>
-                <Text style={styles.statLabel}>Ortalama Başarı</Text>
-              </View>
-            </View>
-          )}
-        </Card.Content>
-      </Card>
-
-      <Card style={styles.menuCard}>
-        <Card.Content>
-          <List.Section>
-            <List.Subheader>Hesap</List.Subheader>
-            <List.Item
-              title="Bildirimler"
-              description="Bildirim ayarlarını yönet"
-              left={props => <List.Icon {...props} icon="bell" />}
-              right={props => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {
-                Alert.alert('Bilgi', 'Bu özellik henüz mevcut değil.');
-              }}
-            />
-            <Divider />
-            <List.Item
-              title="Gizlilik"
-              description="Gizlilik ayarları"
-              left={props => <List.Icon {...props} icon="shield-account" />}
-              right={props => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {
-                Alert.alert('Bilgi', 'Bu özellik henüz mevcut değil.');
-              }}
-            />
-            <Divider />
-            <List.Item
-              title="Yardım"
-              description="Sık sorulan sorular ve destek"
-              left={props => <List.Icon {...props} icon="help-circle" />}
-              right={props => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {
-                Alert.alert('Yardım', 'Kidia Quiz App v1.0\n\nBu uygulama Kidia için geliştirilmiş bir demo quiz uygulamasıdır.');
-              }}
-            />
-            <Divider />
-            <List.Item
-              title="Hakkında"
-              description="Uygulama bilgileri"
-              left={props => <List.Icon {...props} icon="information" />}
-              right={props => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {
-                Alert.alert(
-                  'Hakkında', 
-                  'Kidia Quiz App\nVersiyon: 1.0.0\n\n2-11 yaş arası çocuklar için eğitici quiz uygulaması.\n\nGeliştirici: React Native Developer'
-                );
-              }}
-            />
-          </List.Section>
-        </Card.Content>
-      </Card>
-
-      <View style={styles.logoutContainer}>
-        <Button
-          mode="contained"
-          onPress={handleLogout}
-          style={styles.logoutButton}
-          buttonColor="#F44336"
-          icon="logout"
-        >
-          Çıkış Yap
-        </Button>
+  const renderChallengeCard = (item, index) => (
+    <View key={index} style={styles.challengeCard}>
+      <Text style={styles.challengeTitle}>{item.title}</Text>
+      <View style={styles.challengeValue}>
+        <Text style={styles.challengeIcon}>{item.icon}</Text>
+        <Text style={styles.challengeNumber}>{item.value}</Text>
       </View>
     </View>
+  );
+
+  const renderMenuItem = (item, index) => (
+    <TouchableOpacity key={index} style={styles.menuItem}>
+      <View style={[styles.menuIconContainer, { backgroundColor: item.color }]}>
+        <Ionicons name={item.icon} size={20} color="white" />
+      </View>
+      <Text style={styles.menuItemText}>{item.title}</Text>
+      <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
+
+  if (showExpandedMenu) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <LinearGradient
+          colors={['#F8BBD9', '#E879F9', '#C084FC']}
+          style={styles.gradient}
+        >
+          <ScrollView style={styles.scrollView}>
+            {/* Header with close button */}
+            <View style={styles.expandedHeader}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowExpandedMenu(false)}
+              >
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Challenge Cards */}
+            <View style={styles.challengeContainer}>
+              {challengeData.map(renderChallengeCard)}
+            </View>
+
+            {/* Achievement Progress */}
+            <View style={styles.achievementContainer}>
+              <Text style={styles.achievementTitle}>Total Achievements Unlocked</Text>
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: '22%' }]} />
+                </View>
+                <Text style={styles.progressText}>12/55</Text>
+              </View>
+            </View>
+
+            {/* Parent Zone */}
+            <TouchableOpacity style={styles.parentZone}>
+              <Text style={styles.parentZoneText}>Parent Zone</Text>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            {/* Menu Items */}
+            <View style={styles.menuContainer}>
+              {menuItems.map(renderMenuItem)}
+            </View>
+
+            {/* Edit Profile & Logout */}
+            <View style={styles.bottomActions}>
+              <TouchableOpacity style={styles.editProfileButton}>
+                <Ionicons name="create-outline" size={20} color="#6B7280" />
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+                <Ionicons name="information-circle-outline" size={20} color="#6B7280" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.logoutButtonExpanded} onPress={handleLogout}>
+                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                <Text style={styles.logoutText}>Logout</Text>
+                <Ionicons name="close-circle" size={20} color="#EF4444" />
+              </TouchableOpacity>
+
+              <KidiaButton
+                title="Done"
+                onPress={() => setShowExpandedMenu(false)}
+                style={styles.doneButton}
+              />
+            </View>
+          </ScrollView>
+        </LinearGradient>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={['#F8BBD9', '#E879F9', '#C084FC']}
+        style={styles.gradient}
+      >
+        <ScrollView style={styles.scrollView}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#6B7280" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Profile</Text>
+          </View>
+
+          {/* User Info */}
+          <View style={styles.userInfo}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>🦊</Text>
+              </View>
+            </View>
+            <View style={styles.userDetails}>
+              <Text style={styles.userName}>Full Name (Tom)</Text>
+              <Text style={styles.userAge}>age: 5 yrs</Text>
+            </View>
+            <TouchableOpacity style={styles.moreButton}>
+              <Ionicons name="ellipsis-horizontal" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Challenge Cards */}
+          <View style={styles.challengeContainer}>
+            {challengeData.map(renderChallengeCard)}
+          </View>
+
+          {/* Achievement Progress */}
+          <View style={styles.achievementContainer}>
+            <Text style={styles.achievementTitle}>Total Achievements Unlocked</Text>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: '22%' }]} />
+              </View>
+              <Text style={styles.progressText}>12/55</Text>
+            </View>
+          </View>
+
+          {/* Parent Zone */}
+          <TouchableOpacity style={styles.parentZone}>
+            <Text style={styles.parentZoneText}>Parent Zone</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          {/* Menu Items */}
+          <View style={styles.menuContainer}>
+            {menuItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.menuItem}
+                onPress={() => {
+                  if (index === 0) setShowExpandedMenu(true);
+                }}
+              >
+                <View style={[styles.menuIconContainer, { backgroundColor: item.color }]}>
+                  <Ionicons name={item.icon} size={20} color="white" />
+                </View>
+                <Text style={styles.menuItemText}>{item.title}</Text>
+                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </LinearGradient>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
+  gradient: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  // Header styles
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#6200ee',
-    paddingTop: 60,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#374151',
+    marginLeft: 16,
+  },
+  expandedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  // User info styles
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  avatarContainer: {
+    marginRight: 16,
   },
   avatar: {
-    backgroundColor: '#fff',
-    marginBottom: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#F59E0B',
   },
-  name: {
-    color: '#fff',
-    fontSize: 24,
-    marginBottom: 4,
+  avatarText: {
+    fontSize: 28,
   },
-  role: {
-    color: '#fff',
-    fontSize: 16,
-    opacity: 0.9,
-    marginBottom: 4,
+  userDetails: {
+    flex: 1,
+    paddingVertical: 4,
   },
-  email: {
-    color: '#fff',
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  statsCard: {
-    margin: 16,
-    elevation: 4,
-  },
-  statsTitle: {
+  userName: {
     fontSize: 18,
-    marginBottom: 16,
-    color: '#333',
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 6,
+    letterSpacing: 0.5,
   },
-  statsContainer: {
+  userAge: {
+    fontSize: 15,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  moreButton: {
+    padding: 12,
+    borderRadius: 8,
+  },
+  // Challenge cards styles
+  challengeContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
-  statItem: {
+  challengeCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 12,
+    padding: 12,
+    width: (width - 60) / 3,
     alignItems: 'center',
   },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#6200ee',
+  challengeTitle: {
+    fontSize: 11,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 14,
+    marginBottom: 8,
+  },
+  challengeValue: {
+    alignItems: 'center',
+  },
+  challengeIcon: {
+    fontSize: 16,
     marginBottom: 4,
   },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+  challengeNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F59E0B',
   },
-  menuCard: {
-    margin: 16,
-    marginTop: 0,
-    elevation: 4,
-  },
-  logoutContainer: {
+  // Achievement styles
+  achievementContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
     padding: 16,
-    marginTop: 'auto',
+    marginBottom: 20,
   },
-  logoutButton: {
-    paddingVertical: 8,
+  achievementTitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 12,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#8B7CF6',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8B7CF6',
+  },
+  // Parent zone styles
+  parentZone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+  parentZoneText: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  // Menu styles
+  menuContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: 20,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+  },
+  menuIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#374151',
+  },
+  // Bottom actions styles
+  bottomActions: {
+    marginBottom: 20,
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  editProfileText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#6B7280',
+    marginLeft: 12,
+  },
+  logoutButtonExpanded: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+  logoutText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#EF4444',
+    marginLeft: 12,
+  },
+  doneButton: {
+    marginTop: 10,
   },
 });
 
