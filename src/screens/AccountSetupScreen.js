@@ -28,6 +28,7 @@ const AccountSetupScreen = ({ navigation, route }) => {
     interests: [],
     character: null
   });
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   const interests = [
     'Science', 'Arts', 'History', 'Languages', 'Software', 'Movies',
@@ -121,10 +122,44 @@ const AccountSetupScreen = ({ navigation, route }) => {
         />
 
         <Text style={styles.fieldLabel}>Gender</Text>
-        <TouchableOpacity style={styles.dropdown}>
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+        >
           <Text style={styles.dropdownText}>{profileData.gender}</Text>
-          <Ionicons name="chevron-down" size={20} color="#8B5FBF" />
+          <Ionicons
+            name={showGenderDropdown ? "chevron-up" : "chevron-down"}
+            size={20}
+            color="#8B5FBF"
+          />
         </TouchableOpacity>
+
+        {showGenderDropdown && (
+          <View style={styles.dropdownOptions}>
+            <TouchableOpacity
+              style={styles.dropdownOption}
+              onPress={() => {
+                setProfileData({...profileData, gender: 'Male'});
+                setShowGenderDropdown(false);
+              }}
+            >
+              <Text style={[styles.dropdownOptionText, profileData.gender === 'Male' && styles.selectedOption]}>
+                Male
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownOption}
+              onPress={() => {
+                setProfileData({...profileData, gender: 'Female'});
+                setShowGenderDropdown(false);
+              }}
+            >
+              <Text style={[styles.dropdownOptionText, profileData.gender === 'Female' && styles.selectedOption]}>
+                Female
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <Text style={styles.fieldLabel}>Nickname (Optional)</Text>
         <KidiaInput
@@ -412,6 +447,35 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: 16,
     color: '#374151',
+  },
+  dropdownOptions: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  dropdownOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  dropdownOptionText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  selectedOption: {
+    color: '#8B5FBF',
+    fontWeight: '600',
   },
   ageContainer: {
     alignItems: 'center',

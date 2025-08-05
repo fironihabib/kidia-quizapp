@@ -43,10 +43,8 @@ const KidiaButton = ({
         disabled={disabled}
         {...props}
       >
-        <View style={styles.buttonContent}>
-          {icon && <View style={styles.iconContainer}>{icon}</View>}
-          <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
-        </View>
+        {icon && <View style={styles.iconContainer}>{icon}</View>}
+        <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
       </TouchableOpacity>
     );
   }
@@ -64,10 +62,8 @@ const KidiaButton = ({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <View style={styles.buttonContent}>
-          {icon && <View style={styles.iconContainer}>{icon}</View>}
-          <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
-        </View>
+        {icon && <View style={styles.iconContainer}>{icon}</View>}
+        <Text style={[styles.text, { color: getTextColor() }]}>{children}</Text>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -90,6 +86,7 @@ const styles = StyleSheet.create({
   gradient: {
     borderRadius: 25,
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -99,16 +96,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#8B5FBF',
     backgroundColor: 'transparent',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
   iconContainer: {
     marginRight: 8,
   },
