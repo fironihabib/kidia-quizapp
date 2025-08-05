@@ -20,10 +20,43 @@ import { useApp } from '../context/AppContext';
 
 const LoginScreen = () => {
   const { users, login } = useApp();
-  const [currentScreen, setCurrentScreen] = useState('welcome'); // welcome, roleSelect, userSelect
+  const [currentScreen, setCurrentScreen] = useState('welcome'); // welcome, signup, signin, roleSelect, userSelect
   const [selectedRole, setSelectedRole] = useState('student');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    agreeTerms: false
+  });
 
-  const handleGetStarted = () => {
+  const handleSignUp = () => {
+    setCurrentScreen('signup');
+  };
+
+  const handleSignIn = () => {
+    setCurrentScreen('signin');
+  };
+
+  const handleCreateAccount = () => {
+    // Validate form
+    if (!formData.email || !formData.password) {
+      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+      return;
+    }
+    if (!formData.agreeTerms) {
+      Alert.alert('Hata', 'Lütfen şartları kabul edin');
+      return;
+    }
+    // For demo, go to role selection
+    setCurrentScreen('roleSelect');
+  };
+
+  const handleSignInSubmit = () => {
+    // Validate form
+    if (!formData.email || !formData.password) {
+      Alert.alert('Hata', 'Lütfen email ve şifrenizi girin');
+      return;
+    }
+    // For demo, go to role selection
     setCurrentScreen('roleSelect');
   };
 
@@ -40,6 +73,8 @@ const LoginScreen = () => {
     if (currentScreen === 'userSelect') {
       setCurrentScreen('roleSelect');
     } else if (currentScreen === 'roleSelect') {
+      setCurrentScreen(formData.email ? 'signin' : 'welcome');
+    } else if (currentScreen === 'signup' || currentScreen === 'signin') {
       setCurrentScreen('welcome');
     }
   };
@@ -63,34 +98,178 @@ const LoginScreen = () => {
             <View style={styles.welcomeCard}>
               <Text style={styles.welcomeTitle}>WELCOME!</Text>
               <Text style={styles.welcomeSubtitle}>
-                Eğlenceli quizlerle öğrenmeye hazır mısın? Hadi başlayalım!
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
               </Text>
 
               <View style={styles.buttonContainer}>
                 <KidiaButton
                   variant="primary"
-                  onPress={handleGetStarted}
+                  onPress={handleSignUp}
                   style={styles.primaryButton}
                 >
-                  Başlayalım
+                  Sign up
                 </KidiaButton>
 
-                <Text style={styles.orText}>Veya</Text>
+                <Text style={styles.orText}>Or,</Text>
 
                 <KidiaButton
                   variant="secondary"
-                  onPress={() => setCurrentScreen('roleSelect')}
+                  onPress={handleSignIn}
                   style={styles.secondaryButton}
                 >
-                  Giriş Yap
+                  Sign in
                 </KidiaButton>
               </View>
             </View>
+          </ScrollView>
+        </SafeAreaView>
+      </KidiaBackground>
+    );
+  }
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                Demo uygulama - Gerçek kimlik doğrulama gerektirmez
+  // Sign Up Screen
+  if (currentScreen === 'signup') {
+    return (
+      <KidiaBackground>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
+              </TouchableOpacity>
+              <Text style={styles.appTitle}>QUIZZY</Text>
+              <View style={styles.placeholder} />
+            </View>
+
+            <View style={styles.authCard}>
+              <Text style={styles.authTitle}>Create Account</Text>
+              <Text style={styles.authSubtitle}>
+                Complete the process to continue
               </Text>
+
+              <View style={styles.formContainer}>
+                <KidiaInput
+                  placeholder="Email"
+                  value={formData.email}
+                  onChangeText={(text) => setFormData({...formData, email: text})}
+                  keyboardType="email-address"
+                  icon="mail-outline"
+                />
+
+                <KidiaInput
+                  placeholder="Password"
+                  value={formData.password}
+                  onChangeText={(text) => setFormData({...formData, password: text})}
+                  secureTextEntry
+                  icon="lock-closed-outline"
+                />
+
+                <TouchableOpacity
+                  style={styles.checkboxContainer}
+                  onPress={() => setFormData({...formData, agreeTerms: !formData.agreeTerms})}
+                >
+                  <View style={[styles.checkbox, formData.agreeTerms && styles.checkboxChecked]}>
+                    {formData.agreeTerms && (
+                      <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                    )}
+                  </View>
+                  <Text style={styles.checkboxText}>
+                    I agree with your <Text style={styles.linkText}>Terms & Conditions</Text>
+                  </Text>
+                </TouchableOpacity>
+
+                <KidiaButton
+                  variant="primary"
+                  onPress={handleCreateAccount}
+                  style={styles.authButton}
+                >
+                  Sign up
+                </KidiaButton>
+
+                <Text style={styles.orText}>Or, Sign up with :</Text>
+
+                <View style={styles.socialContainer}>
+                  <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
+                    <Ionicons name="logo-google" size={24} color="#DB4437" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.socialButton, styles.facebookButton]}>
+                    <Ionicons name="logo-facebook" size={24} color="#4267B2" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.socialButton, styles.twitterButton]}>
+                    <Ionicons name="logo-twitter" size={24} color="#1DA1F2" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </KidiaBackground>
+    );
+  }
+
+  // Sign In Screen
+  if (currentScreen === 'signin') {
+    return (
+      <KidiaBackground>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
+              </TouchableOpacity>
+              <Text style={styles.appTitle}>QUIZZY</Text>
+              <View style={styles.placeholder} />
+            </View>
+
+            <View style={styles.authCard}>
+              <Text style={styles.authTitle}>Welcome Back!</Text>
+              <Text style={styles.authSubtitle}>
+                Sign in to your account
+              </Text>
+
+              <View style={styles.formContainer}>
+                <KidiaInput
+                  placeholder="Email"
+                  value={formData.email}
+                  onChangeText={(text) => setFormData({...formData, email: text})}
+                  keyboardType="email-address"
+                  icon="mail-outline"
+                />
+
+                <KidiaInput
+                  placeholder="Password"
+                  value={formData.password}
+                  onChangeText={(text) => setFormData({...formData, password: text})}
+                  secureTextEntry
+                  icon="lock-closed-outline"
+                />
+
+                <TouchableOpacity style={styles.forgotPassword}>
+                  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                </TouchableOpacity>
+
+                <KidiaButton
+                  variant="primary"
+                  onPress={handleSignInSubmit}
+                  style={styles.authButton}
+                >
+                  Sign in
+                </KidiaButton>
+
+                <Text style={styles.orText}>Or, Sign up with :</Text>
+
+                <View style={styles.socialContainer}>
+                  <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
+                    <Ionicons name="logo-google" size={24} color="#DB4437" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.socialButton, styles.facebookButton]}>
+                    <Ionicons name="logo-facebook" size={24} color="#4267B2" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.socialButton, styles.twitterButton]}>
+                    <Ionicons name="logo-twitter" size={24} color="#1DA1F2" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -397,6 +576,106 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  authCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    padding: 30,
+    marginHorizontal: 10,
+    marginTop: 20,
+    shadowColor: '#8B5FBF',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  authTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#6B7280',
+    marginBottom: 8,
+  },
+  authSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#9CA3AF',
+    marginBottom: 30,
+  },
+  formContainer: {
+    gap: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#8B5FBF',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#8B5FBF',
+  },
+  checkboxText: {
+    fontSize: 14,
+    color: '#6B7280',
+    flex: 1,
+  },
+  linkText: {
+    color: '#8B5FBF',
+    textDecorationLine: 'underline',
+  },
+  authButton: {
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: '#8B5FBF',
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 16,
+  },
+  socialButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  socialIcon: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6B7280',
+  },
+  googleButton: {
+    backgroundColor: '#FEF2F2',
+  },
+  facebookButton: {
+    backgroundColor: '#EFF6FF',
+  },
+  twitterButton: {
+    backgroundColor: '#F0F9FF',
   },
 });
 
