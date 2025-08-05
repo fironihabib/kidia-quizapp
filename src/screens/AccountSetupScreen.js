@@ -284,14 +284,6 @@ const AccountSetupScreen = ({ navigation, route }) => {
         <Text style={styles.congratsTitle}>Congratulations!</Text>
         <Text style={styles.congratsSubtitle}>Your account has been successfully created</Text>
 
-        <View style={styles.finalCharacter}>
-          {profileData.character && (
-            <Text style={styles.finalCharacterEmoji}>{profileData.character.emoji}</Text>
-          )}
-        </View>
-
-        <Text style={styles.startTitle}>Start Play & Learn Today!</Text>
-
         <KidiaButton
           variant="primary"
           onPress={handleComplete}
@@ -623,25 +615,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 30,
-  },
-  finalCharacter: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F3E8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  finalCharacterEmoji: {
-    fontSize: 50,
-  },
-  startTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 30,
+    marginBottom: 50,
   },
   startButton: {
     width: '100%',
