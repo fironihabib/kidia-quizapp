@@ -29,38 +29,22 @@ export default function App() {
   );
 
   if (Platform.OS === 'web') {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 425;
-
-    if (isMobile) {
-      return (
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
-          <AppContent />
-        </View>
-      );
-    }
-
     return (
       <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#667eea',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        width: 375,
+        height: 812,
+        maxWidth: '100vw',
+        maxHeight: '100vh',
+        backgroundColor: 'white',
+        borderRadius: 20,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 20 },
+        shadowOpacity: 0.3,
+        shadowRadius: 40,
+        elevation: 20,
       }}>
-        <View style={{
-          width: 375,
-          height: 812,
-          backgroundColor: 'white',
-          borderRadius: 20,
-          overflow: 'hidden',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 20 },
-          shadowOpacity: 0.3,
-          shadowRadius: 40,
-          elevation: 20,
-        }}>
-          <AppContent />
-        </View>
+        <AppContent />
       </View>
     );
   }

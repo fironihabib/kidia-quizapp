@@ -24,48 +24,59 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     
-    /* Mobile container */
-    .mobile-container {
-      width: 375px;
-      height: 812px;
-      max-width: 100vw;
-      max-height: 100vh;
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      position: relative;
-    }
-    
-    /* Responsive adjustments */
+    /* Mobile responsive styles */
     @media (max-width: 425px) {
-      #root {
+      html, body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
         background: white;
-        align-items: stretch;
-        justify-content: stretch;
       }
 
-      .mobile-container {
-        width: 100vw;
+      #root {
         height: 100vh;
-        border-radius: 0;
-        box-shadow: none;
-        max-width: none;
-        max-height: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: white;
       }
-    }
 
-    @media (max-height: 850px) {
-      .mobile-container {
-        height: 100vh;
-        border-radius: 0;
+      #root > div {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
       }
     }
 
     @media (min-width: 426px) {
-      .mobile-container {
+      #root {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      #root > div {
         width: 375px;
         height: 812px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      }
+    }
+
+    @media (max-height: 850px) and (min-width: 426px) {
+      #root {
+        align-items: flex-start;
+        padding: 20px 0;
+      }
+
+      #root > div {
+        height: calc(100vh - 40px);
+        max-height: 812px;
       }
     }
     
@@ -79,6 +90,22 @@
       display: none;
     }
   </style>
+
+  <script>
+    // Debug function to clear localStorage
+    window.clearAppData = function() {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.clear();
+        console.log('App data cleared. Please refresh the page.');
+        window.location.reload();
+      }
+    };
+
+    // Auto-clear on development
+    if (window.location.hostname === 'localhost') {
+      console.log('Development mode: Type clearAppData() to reset the app');
+    }
+  </script>
 </head>
 <body>
   <div id="root"></div>
