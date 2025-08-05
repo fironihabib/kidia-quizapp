@@ -8,258 +8,395 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-import WebSafeButton from '../components/WebSafeButton';
-import WebSafeCard from '../components/WebSafeCard';
+import KidiaBackground from '../components/KidiaBackground';
+import KidiaMascot from '../components/KidiaMascot';
+import KidiaButton from '../components/KidiaButton';
+import KidiaInput from '../components/KidiaInput';
 import { useApp } from '../context/AppContext';
 
 const LoginScreen = () => {
   const { users, login } = useApp();
+  const [currentScreen, setCurrentScreen] = useState('welcome'); // welcome, roleSelect, userSelect
   const [selectedRole, setSelectedRole] = useState('student');
-  const [showUserList, setShowUserList] = useState(false);
 
-  const handleRoleSelection = () => {
-    setShowUserList(true);
+  const handleGetStarted = () => {
+    setCurrentScreen('roleSelect');
+  };
+
+  const handleRoleSelection = (role) => {
+    setSelectedRole(role);
+    setCurrentScreen('userSelect');
   };
 
   const handleUserSelection = (user) => {
-    setShowUserList(false);
     login(user);
+  };
+
+  const handleBack = () => {
+    if (currentScreen === 'userSelect') {
+      setCurrentScreen('roleSelect');
+    } else if (currentScreen === 'roleSelect') {
+      setCurrentScreen('welcome');
+    }
   };
 
   const filteredUsers = users.filter(user => user.role === selectedRole);
 
-  if (showUserList) {
+  // Welcome Screen
+  if (currentScreen === 'welcome') {
     return (
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>KIDIA</Text>
-              <Text style={styles.logoSubtext}>Quiz App</Text>
+      <KidiaBackground>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.header}>
+              <Text style={styles.appTitle}>QUIZZY</Text>
             </View>
-          </View>
 
-          <WebSafeCard style={styles.card}>
-            <WebSafeCard.Content>
-              <Text style={styles.title}>Kullanıcı Seçin</Text>
-              <Text style={styles.subtitle}>
-                {selectedRole === 'teacher' ? 'Öğretmen' : 'Öğrenci'} olarak giriş yapmak için bir kullanıcı seçin:
+            <View style={styles.mascotContainer}>
+              <KidiaMascot size="large" />
+            </View>
+
+            <View style={styles.welcomeCard}>
+              <Text style={styles.welcomeTitle}>WELCOME!</Text>
+              <Text style={styles.welcomeSubtitle}>
+                Eğlenceli quizlerle öğrenmeye hazır mısın? Hadi başlayalım!
               </Text>
 
-              {filteredUsers.map((user) => (
-                <TouchableOpacity
-                  key={user.id}
-                  style={styles.userItem}
-                  onPress={() => handleUserSelection(user)}
+              <View style={styles.buttonContainer}>
+                <KidiaButton
+                  variant="primary"
+                  onPress={handleGetStarted}
+                  style={styles.primaryButton}
                 >
-                  <Text style={styles.userName}>{user.name}</Text>
-                  <Text style={styles.userEmail}>{user.email}</Text>
-                </TouchableOpacity>
-              ))}
-            </WebSafeCard.Content>
+                  Başlayalım
+                </KidiaButton>
 
-            <WebSafeCard.Actions>
-              <WebSafeButton
-                mode="outlined"
-                onPress={() => setShowUserList(false)}
-              >
-                Geri
-              </WebSafeButton>
-            </WebSafeCard.Actions>
-          </WebSafeCard>
-        </ScrollView>
-      </View>
-    );
-  }
+                <Text style={styles.orText}>Veya</Text>
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>KIDIA</Text>
-            <Text style={styles.logoSubtext}>Quiz App</Text>
-          </View>
-        </View>
-
-        <WebSafeCard style={styles.card}>
-          <WebSafeCard.Content>
-            <Text style={styles.title}>Hoş Geldiniz!</Text>
-            <Text style={styles.subtitle}>
-              Lütfen rolünüzü seçin ve giriş yapın
-            </Text>
-
-            <View style={styles.roleContainer}>
-              <Text style={styles.roleTitle}>Rol Seçimi:</Text>
-
-              <View style={styles.radioContainer}>
-                <TouchableOpacity
-                  style={styles.radioItem}
-                  onPress={() => setSelectedRole('student')}
+                <KidiaButton
+                  variant="secondary"
+                  onPress={() => setCurrentScreen('roleSelect')}
+                  style={styles.secondaryButton}
                 >
-                  <View style={[
-                    styles.radioButton,
-                    selectedRole === 'student' && styles.radioButtonSelected
-                  ]} />
-                  <Text style={styles.radioLabel}>Öğrenci</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.radioItem}
-                  onPress={() => setSelectedRole('teacher')}
-                >
-                  <View style={[
-                    styles.radioButton,
-                    selectedRole === 'teacher' && styles.radioButtonSelected
-                  ]} />
-                  <Text style={styles.radioLabel}>Öğretmen</Text>
-                </TouchableOpacity>
+                  Giriş Yap
+                </KidiaButton>
               </View>
             </View>
 
-            <WebSafeButton
-              mode="contained"
-              onPress={handleRoleSelection}
-              style={styles.loginButton}
-            >
-              Giriş Yap
-            </WebSafeButton>
-          </WebSafeCard.Content>
-        </WebSafeCard>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Demo uygulama - Gerçek kimlik doğrulama gerektirmez
+              </Text>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </KidiaBackground>
+    );
+  }
 
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>
-            Demo uygulama - Gerçek kimlik doğrulama gerektirmez
-          </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+  // Role Selection Screen
+  if (currentScreen === 'roleSelect') {
+    return (
+      <KidiaBackground>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
+              </TouchableOpacity>
+              <Text style={styles.appTitle}>QUIZZY</Text>
+              <View style={styles.placeholder} />
+            </View>
+
+            <View style={styles.formCard}>
+              <Text style={styles.formTitle}>Kimsin Sen?</Text>
+              <Text style={styles.formSubtitle}>
+                Devam etmek için rolünü seç
+              </Text>
+
+              <View style={styles.roleOptions}>
+                <TouchableOpacity
+                  style={[
+                    styles.roleCard,
+                    selectedRole === 'student' && styles.roleCardSelected
+                  ]}
+                  onPress={() => handleRoleSelection('student')}
+                >
+                  <View style={styles.roleIcon}>
+                    <Text style={styles.roleEmoji}>🎓</Text>
+                  </View>
+                  <Text style={styles.roleTitle}>Öğrenci</Text>
+                  <Text style={styles.roleDescription}>Quiz çöz ve öğren</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.roleCard,
+                    selectedRole === 'teacher' && styles.roleCardSelected
+                  ]}
+                  onPress={() => handleRoleSelection('teacher')}
+                >
+                  <View style={styles.roleIcon}>
+                    <Text style={styles.roleEmoji}>👩‍🏫</Text>
+                  </View>
+                  <Text style={styles.roleTitle}>Öğretmen</Text>
+                  <Text style={styles.roleDescription}>Quiz oluştur ve yönet</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </KidiaBackground>
+    );
+  }
+
+  // User Selection Screen
+  return (
+    <KidiaBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
+            </TouchableOpacity>
+            <Text style={styles.appTitle}>QUIZZY</Text>
+            <View style={styles.placeholder} />
+          </View>
+
+          <View style={styles.formCard}>
+            <Text style={styles.formTitle}>Hoş Geldin!</Text>
+            <Text style={styles.formSubtitle}>
+              {selectedRole === 'teacher' ? 'Öğretmen' : 'Öğrenci'} olarak giriş yapmak için bir kullanıcı seç
+            </Text>
+
+            <View style={styles.userList}>
+              {filteredUsers.map((user) => (
+                <TouchableOpacity
+                  key={user.id}
+                  style={styles.userCard}
+                  onPress={() => handleUserSelection(user)}
+                >
+                  <View style={styles.userAvatar}>
+                    <Text style={styles.userAvatarText}>
+                      {user.name.charAt(0)}
+                    </Text>
+                  </View>
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>{user.name}</Text>
+                    <Text style={styles.userEmail}>{user.email}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#8B5FBF" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </KidiaBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
   },
-  logoContainer: {
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 40,
+    justifyContent: 'space-between',
+    paddingTop: 20,
+    paddingBottom: 10,
   },
-  logoPlaceholder: {
-    width: 120,
-    height: 120,
-    backgroundColor: '#6200ee',
-    borderRadius: 60,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#000',
+    shadowColor: '#8B5FBF',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  logoText: {
-    fontSize: 24,
+  placeholder: {
+    width: 40,
+  },
+  appTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#8B5FBF',
+    textAlign: 'center',
+    letterSpacing: 2,
   },
-  logoSubtext: {
-    fontSize: 12,
-    color: '#fff',
-    opacity: 0.8,
+  mascotContainer: {
+    alignItems: 'center',
+    marginVertical: 40,
   },
-  card: {
-    elevation: 4,
+  welcomeCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    padding: 30,
+    marginHorizontal: 10,
+    shadowColor: '#8B5FBF',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#8B5FBF',
+    marginBottom: 16,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#6B7280',
+    marginBottom: 30,
+    lineHeight: 24,
+  },
+  buttonContainer: {
+    gap: 16,
+  },
+  primaryButton: {
+    marginBottom: 8,
+  },
+  secondaryButton: {
+    marginTop: 8,
+  },
+  orText: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 30,
     marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
+  footerText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    padding: 30,
+    marginHorizontal: 10,
+    marginTop: 20,
+    shadowColor: '#8B5FBF',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  formTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#8B5FBF',
     marginBottom: 8,
-    color: '#333',
   },
-  subtitle: {
+  formSubtitle: {
     fontSize: 16,
     textAlign: 'center',
+    color: '#6B7280',
     marginBottom: 30,
-    color: '#666',
   },
-  roleContainer: {
-    marginBottom: 30,
+  roleOptions: {
+    gap: 16,
+  },
+  roleCard: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+  },
+  roleCardSelected: {
+    borderColor: '#8B5FBF',
+    backgroundColor: '#F3E8FF',
+  },
+  roleIcon: {
+    marginBottom: 12,
+  },
+  roleEmoji: {
+    fontSize: 40,
   },
   roleTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: '#333',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: 4,
   },
-  radioContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  roleDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
   },
-  radioItem: {
+  userList: {
+    gap: 12,
+  },
+  userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-  },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#6200ee',
-    marginRight: 8,
-  },
-  radioButtonSelected: {
-    backgroundColor: '#6200ee',
-  },
-  radioLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-  loginButton: {
-    marginTop: 20,
-  },
-  userItem: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginVertical: 4,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#8B5FBF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  userAvatarText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  userInfo: {
+    flex: 1,
   },
   userName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: '#374151',
+    marginBottom: 2,
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
-  },
-  infoContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  infoText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    fontStyle: 'italic',
+    color: '#6B7280',
   },
 });
 
