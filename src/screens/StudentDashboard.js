@@ -2,28 +2,21 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  FlatList,
-  RefreshControl,
-} from 'react-native';
-import {
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
   Text,
-  Card,
-  Title,
-  Paragraph,
-  Button,
-  Chip,
-  Searchbar,
-  Badge,
-} from 'react-native-paper';
+  Image,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
+import KidiaBackground from '../components/KidiaBackground';
+import KidiaMascot from '../components/KidiaMascot';
 import { useApp } from '../context/AppContext';
 
 const StudentDashboard = ({ navigation }) => {
   const { currentUser, quizzes, getQuizResultsByStudent } = useApp();
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredQuizzes, setFilteredQuizzes] = useState([]);
   const [studentResults, setStudentResults] = useState([]);
 
   // Load data when screen comes into focus
@@ -33,140 +26,16 @@ const StudentDashboard = ({ navigation }) => {
     }, [currentUser])
   );
 
-  // Filter quizzes based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredQuizzes(quizzes);
-    } else {
-      const filtered = quizzes.filter(quiz =>
-        quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        quiz.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        quiz.teacherName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredQuizzes(filtered);
-    }
-  }, [searchQuery, quizzes]);
-
   const loadData = () => {
     if (currentUser) {
       const results = getQuizResultsByStudent(currentUser.id);
       setStudentResults(results);
-      setFilteredQuizzes(quizzes);
     }
   };
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    loadData();
-    setRefreshing(false);
-  }, []);
 
   const getQuizResult = (quizId) => {
     return studentResults.find(result => result.quizId === quizId);
   };
-
-  const getScoreColor = (percentage) => {
-    if (percentage >= 80) return '#4CAF50'; // Green
-    if (percentage >= 60) return '#FF9800'; // Orange
-    return '#F44336'; // Red
-  };
-
-  const renderQuizCard = ({ item }) => {
-    const result = getQuizResult(item.id);
-    const hasCompleted = !!result;
-    const scorePercentage = hasCompleted 
-      ? Math.round((result.score / result.totalPoints) * 100)
-      : 0;
-
-    return (
-      <Card style={styles.quizCard}>
-        <Card.Content>
-          <View style={styles.cardHeader}>
-            <View style={styles.titleContainer}>
-              <Title style={styles.quizTitle}>{item.title}</Title>
-              <Paragraph style={styles.quizDescription}>{item.description}</Paragraph>
-              <Text style={styles.teacherName}>Öğretmen: {item.teacherName}</Text>
-            </View>
-            {hasCompleted && (
-              <View style={styles.scoreContainer}>
-                <Badge 
-                  style={[
-                    styles.scoreBadge, 
-                    { backgroundColor: getScoreColor(scorePercentage) }
-                  ]}
-                >
-                  {scorePercentage}%
-                </Badge>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.quizInfo}>
-            <Chip icon="help-circle" style={styles.chip}>
-              {item.questions.length} Soru
-            </Chip>
-            <Chip icon="calendar" style={styles.chip}>
-              {item.createdAt}
-            </Chip>
-            {hasCompleted && (
-              <Chip 
-                icon="check-circle" 
-                style={[styles.chip, styles.completedChip]}
-              >
-                Tamamlandı
-              </Chip>
-            )}
-          </View>
-
-          {hasCompleted && (
-            <View style={styles.resultContainer}>
-              <View style={styles.resultItem}>
-                <Text style={styles.resultNumber}>{result.correctAnswers}</Text>
-                <Text style={styles.resultLabel}>Doğru</Text>
-              </View>
-              <View style={styles.resultItem}>
-                <Text style={styles.resultNumber}>{result.totalQuestions - result.correctAnswers}</Text>
-                <Text style={styles.resultLabel}>Yanlış</Text>
-              </View>
-              <View style={styles.resultItem}>
-                <Text style={styles.resultNumber}>{result.score}</Text>
-                <Text style={styles.resultLabel}>Puan</Text>
-              </View>
-            </View>
-          )}
-        </Card.Content>
-
-        <Card.Actions>
-          <Button
-            mode={hasCompleted ? "outlined" : "contained"}
-            onPress={() => navigation.navigate('TakeQuiz', { quiz: item })}
-          >
-            {hasCompleted ? 'Tekrar Çöz' : 'Quiz\'i Başlat'}
-          </Button>
-          {hasCompleted && (
-            <Button
-              mode="text"
-              onPress={() => navigation.navigate('QuizResult', { 
-                result: result,
-                quiz: item 
-              })}
-            >
-              Sonuçları Gör
-            </Button>
-          )}
-        </Card.Actions>
-      </Card>
-    );
-  };
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyTitle}>Henüz quiz bulunmuyor</Text>
-      <Text style={styles.emptyText}>
-        Öğretmenleriniz quiz oluşturduğunda burada görünecek
-      </Text>
-    </View>
-  );
 
   const getCompletedQuizzesCount = () => {
     return studentResults.length;
@@ -174,192 +43,402 @@ const StudentDashboard = ({ navigation }) => {
 
   const getAverageScore = () => {
     if (studentResults.length === 0) return 0;
-    const totalPercentage = studentResults.reduce((sum, result) => 
+    const totalPercentage = studentResults.reduce((sum, result) =>
       sum + (result.score / result.totalPoints * 100), 0
     );
     return Math.round(totalPercentage / studentResults.length);
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Title style={styles.headerTitle}>Merhaba, {currentUser?.name}!</Title>
-        <Paragraph style={styles.headerSubtitle}>Quiz'leri çözün ve öğrenin</Paragraph>
-        
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{getCompletedQuizzesCount()}</Text>
-            <Text style={styles.statLabel}>Tamamlanan</Text>
+  const quizCategories = [
+    {
+      id: 1,
+      title: 'Mathematics',
+      icon: '🔢',
+      color: '#FF6B6B',
+      quizCount: quizzes.filter(q => q.category === 'math').length || Math.floor(Math.random() * 5) + 3
+    },
+    {
+      id: 2,
+      title: 'Science',
+      icon: '🔬',
+      color: '#4ECDC4',
+      quizCount: quizzes.filter(q => q.category === 'science').length || Math.floor(Math.random() * 5) + 2
+    },
+    {
+      id: 3,
+      title: 'History',
+      icon: '📚',
+      color: '#45B7D1',
+      quizCount: quizzes.filter(q => q.category === 'history').length || Math.floor(Math.random() * 5) + 1
+    },
+    {
+      id: 4,
+      title: 'Geography',
+      icon: '🌍',
+      color: '#96CEB4',
+      quizCount: quizzes.filter(q => q.category === 'geography').length || Math.floor(Math.random() * 5) + 2
+    },
+    {
+      id: 5,
+      title: 'Language',
+      icon: '📝',
+      color: '#FFEAA7',
+      quizCount: quizzes.filter(q => q.category === 'language').length || Math.floor(Math.random() * 5) + 4
+    },
+    {
+      id: 6,
+      title: 'Art',
+      icon: '🎨',
+      color: '#DDA0DD',
+      quizCount: quizzes.filter(q => q.category === 'art').length || Math.floor(Math.random() * 5) + 1
+    }
+  ];
+
+  const renderCategoryCard = (category) => (
+    <TouchableOpacity
+      key={category.id}
+      style={[styles.categoryCard, { backgroundColor: category.color }]}
+      onPress={() => navigation.navigate('CategoryQuizzes', { category })}
+    >
+      <View style={styles.categoryIcon}>
+        <Text style={styles.categoryEmoji}>{category.icon}</Text>
+      </View>
+      <Text style={styles.categoryTitle}>{category.title}</Text>
+      <Text style={styles.categoryCount}>{category.quizCount} Quizzes</Text>
+    </TouchableOpacity>
+  );
+
+  const renderRecentQuiz = (quiz) => {
+    const result = getQuizResult(quiz.id);
+    const hasCompleted = !!result;
+
+    return (
+      <TouchableOpacity
+        key={quiz.id}
+        style={styles.recentQuizCard}
+        onPress={() => navigation.navigate('TakeQuiz', { quiz })}
+      >
+        <View style={styles.quizCardContent}>
+          <View style={styles.quizInfo}>
+            <Text style={styles.quizTitle}>{quiz.title}</Text>
+            <Text style={styles.quizTeacher}>by {quiz.teacherName}</Text>
+            <Text style={styles.quizQuestions}>{quiz.questions.length} questions</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{quizzes.length}</Text>
-            <Text style={styles.statLabel}>Toplam Quiz</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{getAverageScore()}%</Text>
-            <Text style={styles.statLabel}>Ort. Başarı</Text>
+          <View style={styles.quizStatus}>
+            {hasCompleted ? (
+              <View style={styles.completedBadge}>
+                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                <Text style={styles.completedText}>Completed</Text>
+              </View>
+            ) : (
+              <View style={styles.playButton}>
+                <Ionicons name="play-circle" size={24} color="#8B5FBF" />
+              </View>
+            )}
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
+    );
+  };
 
-      <Searchbar
-        placeholder="Quiz ara..."
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        style={styles.searchbar}
-      />
+  return (
+    <KidiaBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
+              <View style={styles.userInfo}>
+                <Text style={styles.greeting}>Hello,</Text>
+                <Text style={styles.userName}>{currentUser?.name || 'Student'}!</Text>
+              </View>
+              <TouchableOpacity style={styles.profileButton}>
+                <View style={styles.profileAvatar}>
+                  {currentUser?.profile?.character ? (
+                    <Text style={styles.avatarEmoji}>{currentUser.profile.character.emoji}</Text>
+                  ) : (
+                    <Ionicons name="person" size={24} color="#8B5FBF" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
 
-      <FlatList
-        data={filteredQuizzes}
-        renderItem={renderQuizCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={renderEmptyState}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+            <Text style={styles.subtitle}>Let's make this day productive</Text>
+
+            {/* Stats Cards */}
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{getCompletedQuizzesCount()}</Text>
+                <Text style={styles.statLabel}>Completed</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{quizzes.length}</Text>
+                <Text style={styles.statLabel}>Total Quizzes</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{getAverageScore()}%</Text>
+                <Text style={styles.statLabel}>Average Score</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Categories Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Categories</Text>
+              <TouchableOpacity>
+                <Text style={styles.seeAllText}>See all</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.categoriesGrid}>
+              {quizCategories.map(renderCategoryCard)}
+            </View>
+          </View>
+
+          {/* Recent Quizzes Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Quizzes</Text>
+              <TouchableOpacity>
+                <Text style={styles.seeAllText}>See all</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.recentQuizzes}>
+              {quizzes.slice(0, 3).map(renderRecentQuiz)}
+              {quizzes.length === 0 && (
+                <View style={styles.emptyState}>
+                  <KidiaMascot size="medium" />
+                  <Text style={styles.emptyTitle}>No quizzes yet!</Text>
+                  <Text style={styles.emptyText}>Your teachers will add quizzes soon</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </KidiaBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
-    padding: 20,
-    backgroundColor: '#6200ee',
-    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30,
   },
-  headerTitle: {
-    color: '#fff',
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  userName: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: '#374151',
   },
-  headerSubtitle: {
-    color: '#fff',
-    opacity: 0.8,
-    marginBottom: 20,
+  subtitle: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginBottom: 24,
+  },
+  profileButton: {
+    padding: 4,
+  },
+  profileAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F3E8FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 24,
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    paddingVertical: 16,
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  statItem: {
+  statCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
+    shadowColor: '#8B5FBF',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#8B5FBF',
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#fff',
-    opacity: 0.8,
-    marginTop: 4,
+    color: '#6B7280',
+    textAlign: 'center',
   },
-  searchbar: {
-    margin: 16,
-    elevation: 2,
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
-  listContainer: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  quizCard: {
-    marginBottom: 16,
-    elevation: 2,
-  },
-  cardHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  titleContainer: {
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: '#8B5FBF',
+    fontWeight: '600',
+  },
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  categoryCard: {
+    width: '48%',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  categoryIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryEmoji: {
+    fontSize: 24,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  categoryCount: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+  },
+  recentQuizzes: {
+    gap: 12,
+  },
+  recentQuizCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#8B5FBF',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  quizCardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  quizInfo: {
     flex: 1,
   },
   quizTitle: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  quizDescription: {
-    color: '#666',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  teacherName: {
-    color: '#888',
-    fontSize: 12,
-    fontStyle: 'italic',
-  },
-  scoreContainer: {
-    alignItems: 'center',
-  },
-  scoreBadge: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  quizTeacher: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  quizQuestions: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  quizStatus: {
+    alignItems: 'center',
+  },
+  completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
     paddingHorizontal: 8,
     paddingVertical: 4,
+    borderRadius: 12,
   },
-  quizInfo: {
-    flexDirection: 'row',
-    marginTop: 12,
-    marginBottom: 16,
-    flexWrap: 'wrap',
-  },
-  chip: {
-    marginRight: 8,
-    marginBottom: 4,
-  },
-  completedChip: {
-    backgroundColor: '#4CAF50',
-  },
-  resultContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-  },
-  resultItem: {
-    alignItems: 'center',
-  },
-  resultNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#6200ee',
-  },
-  resultLabel: {
+  completedText: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+    color: '#4CAF50',
+    marginLeft: 4,
+    fontWeight: '600',
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  playButton: {
+    padding: 8,
+  },
+  emptyState: {
     alignItems: 'center',
-    paddingHorizontal: 40,
-    marginTop: 100,
+    paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#333',
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
+    color: '#6B7280',
     textAlign: 'center',
-    color: '#666',
-    lineHeight: 24,
   },
 });
 

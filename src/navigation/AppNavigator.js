@@ -11,6 +11,7 @@ import LoginScreen from '../screens/LoginScreen';
 import AccountSetupScreen from '../screens/AccountSetupScreen';
 import TeacherDashboard from '../screens/TeacherDashboard';
 import StudentDashboard from '../screens/StudentDashboard';
+import CategoryQuizzesScreen from '../screens/CategoryQuizzesScreen';
 import CreateQuizScreen from '../screens/CreateQuizScreen';
 import EditQuizScreen from '../screens/EditQuizScreen';
 import QuizDetailScreen from '../screens/QuizDetailScreen';
@@ -144,24 +145,29 @@ const AppStackNavigator = () => {
         </>
       ) : currentUser?.role === 'student' ? (
         <>
-          <Stack.Screen 
-            name="StudentTabs" 
-            component={StudentTabNavigator} 
+          <Stack.Screen
+            name="StudentTabs"
+            component={StudentTabNavigator}
             options={{ headerShown: false }}
           />
-          <Stack.Screen 
-            name="TakeQuiz" 
+          <Stack.Screen
+            name="CategoryQuizzes"
+            component={CategoryQuizzesScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="TakeQuiz"
             component={TakeQuizScreen}
-            options={{ 
+            options={{
               title: 'Quiz',
               headerStyle: { backgroundColor: '#6200ee' },
               headerTintColor: '#fff',
             }}
           />
-          <Stack.Screen 
-            name="QuizResult" 
+          <Stack.Screen
+            name="QuizResult"
             component={QuizResultScreen}
-            options={{ 
+            options={{
               title: 'Sonuç',
               headerStyle: { backgroundColor: '#6200ee' },
               headerTintColor: '#fff',
