@@ -8,6 +8,7 @@ import { useApp } from '../context/AppContext';
 
 // Import screens
 import LoginScreen from '../screens/LoginScreen';
+import AccountSetupScreen from '../screens/AccountSetupScreen';
 import TeacherDashboard from '../screens/TeacherDashboard';
 import StudentDashboard from '../screens/StudentDashboard';
 import CreateQuizScreen from '../screens/CreateQuizScreen';
@@ -95,6 +96,7 @@ const AuthStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="AccountSetup" component={AccountSetupScreen} />
     </Stack.Navigator>
   );
 };

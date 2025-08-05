@@ -46,8 +46,8 @@ const LoginScreen = () => {
       Alert.alert('Hata', 'Lütfen şartları kabul edin');
       return;
     }
-    // For demo, go to role selection
-    setCurrentScreen('roleSelect');
+    // Navigate to account setup for students
+    navigation.navigate('AccountSetup');
   };
 
   const handleSignInSubmit = () => {
