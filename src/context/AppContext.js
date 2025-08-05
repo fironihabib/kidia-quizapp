@@ -101,7 +101,7 @@ export const AppProvider = ({ children }) => {
   // Save data to AsyncStorage whenever state changes
   useEffect(() => {
     saveDataToStorage();
-  }, [state.quizzes, state.quizResults, state.currentUser]);
+  }, [state.quizzes, state.quizResults]);
 
   const loadStoredData = async () => {
     try {
@@ -122,13 +122,14 @@ export const AppProvider = ({ children }) => {
 
       const loadedData = {};
 
-      if (storedUser) {
-        try {
-          loadedData.currentUser = JSON.parse(storedUser);
-        } catch (parseError) {
-          console.warn('Error parsing stored user:', parseError);
-        }
-      }
+      // Don't auto-load currentUser - always start from login screen
+      // if (storedUser) {
+      //   try {
+      //     loadedData.currentUser = JSON.parse(storedUser);
+      //   } catch (parseError) {
+      //     console.warn('Error parsing stored user:', parseError);
+      //   }
+      // }
 
       if (storedQuizzes) {
         try {
@@ -159,13 +160,14 @@ export const AppProvider = ({ children }) => {
 
   const saveDataToStorage = async () => {
     try {
-      if (state.currentUser) {
-        try {
-          await storage.setItem('currentUser', JSON.stringify(state.currentUser));
-        } catch (error) {
-          console.warn('Error saving current user:', error);
-        }
-      }
+      // Don't persist currentUser - always start from login
+      // if (state.currentUser) {
+      //   try {
+      //     await storage.setItem('currentUser', JSON.stringify(state.currentUser));
+      //   } catch (error) {
+      //     console.warn('Error saving current user:', error);
+      //   }
+      // }
       try {
         await storage.setItem('quizzes', JSON.stringify(state.quizzes));
         await storage.setItem('quizResults', JSON.stringify(state.quizResults));

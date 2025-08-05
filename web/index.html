@@ -101,9 +101,14 @@
       }
     };
 
-    // Auto-clear on development
+    // Auto-clear currentUser on development to always start from login
     if (window.location.hostname === 'localhost') {
       console.log('Development mode: Type clearAppData() to reset the app');
+      // Clear only currentUser to force login screen
+      if (localStorage.getItem('currentUser')) {
+        localStorage.removeItem('currentUser');
+        console.log('Cleared currentUser - app will start from login screen');
+      }
     }
   </script>
 </head>
