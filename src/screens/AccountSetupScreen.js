@@ -16,8 +16,9 @@ import KidiaButton from '../components/KidiaButton';
 import KidiaInput from '../components/KidiaInput';
 import { useApp } from '../context/AppContext';
 
-const AccountSetupScreen = ({ navigation }) => {
-  const { login } = useApp();
+const AccountSetupScreen = ({ navigation, route }) => {
+  const { login, addUser } = useApp();
+  const { email, password } = route.params || {};
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     fullName: '',
@@ -75,11 +76,14 @@ const AccountSetupScreen = ({ navigation }) => {
     const newUser = {
       id: Date.now(),
       name: profileData.fullName,
-      email: 'student@demo.com',
+      email: email || 'student@demo.com',
+      password: password,
       role: 'student',
       profile: profileData
     };
-    
+
+    // Add user to users list and login
+    addUser(newUser);
     login(newUser);
   };
 

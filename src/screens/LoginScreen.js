@@ -18,7 +18,7 @@ import KidiaButton from '../components/KidiaButton';
 import KidiaInput from '../components/KidiaInput';
 import { useApp } from '../context/AppContext';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const { users, login } = useApp();
   const [currentScreen, setCurrentScreen] = useState('welcome'); // welcome, signup, signin, roleSelect, userSelect
   const [selectedRole, setSelectedRole] = useState('student');
@@ -47,7 +47,10 @@ const LoginScreen = () => {
       return;
     }
     // Navigate to account setup for students
-    navigation.navigate('AccountSetup');
+    navigation.navigate('AccountSetup', {
+      email: formData.email,
+      password: formData.password
+    });
   };
 
   const handleSignInSubmit = () => {

@@ -17,6 +17,7 @@ export const ActionTypes = {
   SET_CURRENT_USER: 'SET_CURRENT_USER',
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
+  ADD_USER: 'ADD_USER',
   ADD_QUIZ: 'ADD_QUIZ',
   UPDATE_QUIZ: 'UPDATE_QUIZ',
   DELETE_QUIZ: 'DELETE_QUIZ',
@@ -42,6 +43,11 @@ const appReducer = (state, action) => {
       return {
         ...state,
         error: action.payload,
+      };
+    case ActionTypes.ADD_USER:
+      return {
+        ...state,
+        users: [...state.users, action.payload],
       };
     case ActionTypes.ADD_QUIZ:
       return {
@@ -172,6 +178,10 @@ export const AppProvider = ({ children }) => {
   };
 
   // Action creators
+  const addUser = (user) => {
+    dispatch({ type: ActionTypes.ADD_USER, payload: user });
+  };
+
   const login = (user) => {
     dispatch({ type: ActionTypes.SET_CURRENT_USER, payload: user });
   };
@@ -233,6 +243,7 @@ export const AppProvider = ({ children }) => {
 
   const value = {
     ...state,
+    addUser,
     login,
     logout,
     addQuiz,
