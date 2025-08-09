@@ -7,6 +7,8 @@ import {
   Text,
   TouchableOpacity,
   SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -139,7 +141,14 @@ const LoginScreen = ({ navigation }) => {
     return (
       <KidiaBackground>
         <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoidingView}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              keyboardShouldPersistTaps="handled"
+            >
             <View style={styles.header}>
               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
@@ -208,7 +217,8 @@ const LoginScreen = ({ navigation }) => {
                 </View>
               </View>
             </View>
-          </ScrollView>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </KidiaBackground>
     );
@@ -219,7 +229,14 @@ const LoginScreen = ({ navigation }) => {
     return (
       <KidiaBackground>
         <SafeAreaView style={styles.container}>
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoidingView}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              keyboardShouldPersistTaps="handled"
+            >
             <View style={styles.header}>
               <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#8B5FBF" />
@@ -278,7 +295,8 @@ const LoginScreen = ({ navigation }) => {
                 </View>
               </View>
             </View>
-          </ScrollView>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </KidiaBackground>
     );
@@ -388,6 +406,9 @@ const LoginScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  keyboardAvoidingView: {
     flex: 1,
   },
   scrollContainer: {
